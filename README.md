@@ -1,2 +1,12 @@
 # mawkeji-schema
-Generated mirror of the Mawqeji site-data schema + validator — do not edit; overwritten by platform CI (D18)
+
+Generated mirror. **Do not edit here.** The authoritative copies live in
+the private `mawkeji` platform repo at `schema/site-data.schema.json`
+and `scripts/validate.js`; this repo is overwritten by that repo's
+CI on every CMS deploy (D18).
+
+It exists so customer-repo CI can validate `site-data.json` without a
+credential. Usage:
+
+    npm i ajv@8
+    node scripts/validate.js path/to/site-data.json

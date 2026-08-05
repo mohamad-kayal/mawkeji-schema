@@ -1,0 +1,448 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mawqeji.example/schema/site-data.schema.json",
+  "title": "Mawqeji site-data v1",
+  "description": "Canonical content payload for one Mawqeji site. Human contract: schema/SCHEMA.md — that file is the source of truth, this is its machine-checkable twin. NO SECRET MAY EVER BE ADDED HERE: the payload is published wholesale into world-readable HTML.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "seo", "features", "contact", "categories", "items"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siteId", "businessName", "siteType", "themeId", "locale"],
+      "properties": {
+        "siteId": { "type": "string", "minLength": 1 },
+        "businessName": { "type": "string", "minLength": 1 },
+        "siteType": {
+          "type": "string",
+          "enum": ["restaurant", "sweets", "cafe", "clothing", "jewelry", "perfume", "wedding", "electronics", "furniture", "salon", "hall", "institute"]
+        },
+        "themeId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Equals the template folder slug (templates/<themeId>/). Not enumerated on purpose — see SCHEMA.md §6."
+        },
+        "locale": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lang": { "type": "string" },
+            "dir": { "type": "string", "enum": ["rtl", "ltr"] }
+          }
+        },
+        "currency": { "type": "string" }
+      }
+    },
+
+    "seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cart": { "type": "boolean", "default": false },
+        "inquiry": { "type": "boolean", "default": false },
+        "booking": { "type": "boolean", "default": false },
+        "reservation": { "type": "boolean", "default": false },
+        "packages": { "type": "boolean", "default": false },
+        "gallery": { "type": "boolean", "default": false },
+        "banner": { "type": "boolean", "default": false },
+        "servicePages": { "type": "boolean", "default": false },
+        "giftNote": { "type": "boolean", "default": false },
+        "sizeOptions": { "type": "boolean", "default": false },
+        "weightPricing": { "type": "boolean", "default": false },
+        "liveOrders": { "type": "boolean", "default": false }
+      }
+    },
+
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "tagline": { "type": "string" },
+        "since": { "type": "string" }
+      }
+    },
+
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["whatsapp"],
+      "properties": {
+        "phone": { "type": "string" },
+        "whatsapp": {
+          "type": "string",
+          "pattern": "^[0-9]{8,15}$",
+          "description": "Digits only, full international, no + and no spaces (wa.me format)."
+        },
+        "address": { "type": "string" },
+        "area": { "type": "string" },
+        "mapUrl": {
+          "type": "string",
+          "pattern": "^(https://.+)?$",
+          "description": "Map link. https:// only (or empty). Templates render this straight into an <a href>, so a javascript:/data: value would be stored XSS on the customer's public site — this pattern is the server-side gate, publish validates before it deploys. Templates carry safeHref() as the second layer."
+        },
+        "social": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "facebook": {
+              "type": "string",
+              "pattern": "^(https://.+|[^:]*)$",
+              "description": "Full URL or bare handle (SCHEMA.md §4 — 'template decides'). Either an https:// URL, or any string carrying no colon at all: a colon is what makes a scheme, so this admits every handle form while refusing javascript:/data:/vbscript: outright. Same href-scheme anchoring reason as mapUrl above."
+            },
+            "instagram": {
+              "type": "string",
+              "pattern": "^(https://.+|[^:]*)$",
+              "description": "Full URL or bare handle (SCHEMA.md §4 — 'template decides'). Either an https:// URL, or any string carrying no colon at all: a colon is what makes a scheme, so this admits every handle form while refusing javascript:/data:/vbscript: outright. Same href-scheme anchoring reason as mapUrl above."
+            }
+          }
+        }
+      }
+    },
+
+    "hours": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["day"],
+        "properties": {
+          "day": { "type": "string", "minLength": 1 },
+          "open": { "type": "string" },
+          "close": { "type": "string" },
+          "closed": { "type": "boolean", "default": false }
+        }
+      }
+    },
+
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "deliveryEnabled": { "type": "boolean", "default": false },
+        "pickupEnabled": { "type": "boolean", "default": false },
+        "areas": { "type": "array", "items": { "type": "string" } },
+        "fee": { "type": "integer", "minimum": 0 },
+        "minOrder": { "type": "integer", "minimum": 0 },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "nav": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "icon": { "type": "string" },
+          "order": { "type": "integer" },
+          "visible": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "home": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "heroHeadline": { "type": "string" },
+        "heroSubline": { "type": "string" },
+        "ctaLabel": { "type": "string" },
+        "trustStrip": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "icon": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "storyTeaser": { "type": "string" },
+        "foundedYear": { "type": ["string", "integer"] }
+      }
+    },
+
+    "about": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "story": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string" },
+              "text": { "type": "string" }
+            }
+          }
+        },
+        "ownerQuote": { "type": "string" },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "year": { "type": "string" },
+              "text": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "order": { "type": "integer" },
+          "visible": { "type": "boolean", "default": true },
+          "artId": { "type": "string" }
+        }
+      }
+    },
+
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "categoryId"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "categoryId": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "price": { "type": "integer", "minimum": 0 },
+          "unit": { "type": "string" },
+          "badge": { "type": "string" },
+          "priceMode": {
+            "type": "string",
+            "enum": ["fixed", "byWeight", "onRequest", "from"],
+            "default": "fixed"
+          },
+          "weightGrams": { "type": "integer", "minimum": 0 },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "values"],
+              "properties": {
+                "label": { "type": "string", "minLength": 1 },
+                "values": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+              }
+            }
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Real photo. Plain string on purpose — relative paths are valid (interim manual publish). No format constraint."
+          },
+          "artId": { "type": "string" },
+          "visible": { "type": "boolean", "default": true },
+          "order": { "type": "integer" }
+        }
+      }
+    },
+
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "price": { "type": "integer", "minimum": 0 },
+          "features": { "type": "array", "items": { "type": "string" } },
+          "badge": { "type": "string" },
+          "visible": { "type": "boolean", "default": true },
+          "order": { "type": "integer" }
+        }
+      }
+    },
+
+    "servicePages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "intro": { "type": "string" },
+          "layout": { "type": "string", "enum": ["steps", "list"], "default": "steps" },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": { "type": "string" },
+                "text": { "type": "string" }
+              }
+            }
+          },
+          "priceFrom": { "type": "integer", "minimum": 0 },
+          "priceNote": { "type": "string" },
+          "ctaLabel": { "type": "string" },
+          "ctaMessage": { "type": "string" },
+          "visible": { "type": "boolean", "default": true },
+          "order": { "type": "integer" }
+        }
+      }
+    },
+
+    "gallery": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "imageUrl"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "imageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Plain string on purpose — relative paths are valid. No format constraint."
+          },
+          "caption": { "type": "string" },
+          "order": { "type": "integer" },
+          "visible": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "testimonials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "text"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "area": { "type": "string" },
+          "text": { "type": "string", "minLength": 1 },
+          "visible": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "faq": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "q", "a"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "q": { "type": "string", "minLength": 1 },
+          "a": { "type": "string", "minLength": 1 },
+          "order": { "type": "integer" },
+          "visible": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
+    "banner": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "text": { "type": "string" },
+        "style": { "type": "string" }
+      }
+    },
+
+    "ordering": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "type": "string", "enum": ["cart", "inquiry", "booking"] },
+        "extraFields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "label", "type"],
+            "properties": {
+              "key": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "type": {
+                "type": "string",
+                "enum": ["text", "textarea", "checkbox", "date", "select"]
+              },
+              "required": { "type": "boolean", "default": false },
+              "values": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+            },
+            "if": {
+              "properties": { "type": { "const": "select" } },
+              "required": ["type"]
+            },
+            "then": { "required": ["values"] }
+          }
+        }
+      }
+    },
+
+    "waMessages": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "orderTitle": { "type": "string" },
+        "paymentLine": { "type": "string" },
+        "inquiry": { "type": "string" },
+        "booking": { "type": "string" }
+      }
+    },
+
+    "orders": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Reserved for the live-orders phase (D2). tablesCount is the whole reservation; the staff PIN lives outside site-data — see SCHEMA.md §1 and §7.",
+      "properties": {
+        "tablesCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "presetId": { "type": "string" }
+      }
+    },
+
+    "themeExtras": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Namespaced by themeId, free-form, agency-edited, documented in that theme's THEME.md. Not a bypass for the no-secrets rule."
+    }
+  }
+}
