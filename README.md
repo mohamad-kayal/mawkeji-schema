@@ -6,7 +6,7 @@ and `scripts/validate.js`; this repo is overwritten by that repo's
 CI on every CMS deploy (D18).
 
 It exists so customer-repo CI can validate `site-data.json` without a
-credential. Usage:
+credential. Usage (from this repo's root):
 
-    npm i ajv@8
+    npm i
     node scripts/validate.js path/to/site-data.json

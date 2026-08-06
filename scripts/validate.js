@@ -51,15 +51,35 @@ function referentialErrors(data) {
       errors.push(`/items/${i}/categoryId "${item.categoryId}" not found in categories`);
     }
   });
+  // servicePages composition refs (2026-08-06 spec Part 3): a service page
+  // names the category whose items it displays and/or one item its action
+  // button adds — explicit in the entry since the rework that moved this
+  // out of per-theme themeExtras glue. A dangling ref silently empties a
+  // grid or kills a button in the browser — same failure class as
+  // items[].categoryId above.
+  const itemIds = new Set(arr('items').map(it => it?.id));
+  arr('servicePages').forEach((sp, i) => {
+    if (typeof sp?.itemsCategoryId === 'string' && !categoryIds.has(sp.itemsCategoryId)) {
+      errors.push(`/servicePages/${i}/itemsCategoryId "${sp.itemsCategoryId}" not found in categories`);
+    }
+    if (typeof sp?.addItemId === 'string' && !itemIds.has(sp.addItemId)) {
+      errors.push(`/servicePages/${i}/addItemId "${sp.addItemId}" not found in items`);
+    }
+  });
   // themeExtras category refs (2026-08-05 audit P6): themes park category-id
   // foreign keys under themeExtras[<own theme slug>] using a *CategoryId /
-  // *CategoryIds naming convention (e.g. sweets' traysCategoryId,
-  // electronics' accessoryCategoryIds). A dangling ref silently empties a
+  // *CategoryIds naming convention (e.g. electronics' accessoryCategoryIds,
+  // hall's hallCategoryIds). A dangling ref silently empties a
   // whole view in the browser — same failure class as items[].categoryId
   // above. Checked by KEY SHAPE only, top-level keys only, and only for the
   // payload's own theme slug: this stays theme-agnostic (no per-theme
   // knowledge) and absence stays legal (no themeExtras, no slug key, or a
   // value of another type = nothing to check).
+  // Same class as the categoryId refs above, but into items[] instead: a
+  // *ItemId / *ItemIds key under the payload's own theme slug is a foreign
+  // key on items[].id (e.g. the restaurant theme's dailyMealItemId, the
+  // jewelry theme's featuredItemIds). Reuses the itemIds set declared for
+  // the servicePages checks above (merge of two lines that each added one).
   const slug = data?.meta?.themeId;
   const extras = data?.themeExtras?.[slug];
   if (extras && typeof extras === 'object' && !Array.isArray(extras)) {
@@ -71,6 +91,16 @@ function referentialErrors(data) {
         value.forEach((v, i) => {
           if (typeof v === 'string' && !categoryIds.has(v)) {
             errors.push(`/themeExtras/${slug}/${key}/${i} "${v}" not found in categories`);
+          }
+        });
+      }
+      if (/ItemId$/.test(key) && typeof value === 'string' && !itemIds.has(value)) {
+        errors.push(`/themeExtras/${slug}/${key} "${value}" not found in items`);
+      }
+      if (/ItemIds$/.test(key) && Array.isArray(value)) {
+        value.forEach((v, i) => {
+          if (typeof v === 'string' && !itemIds.has(v)) {
+            errors.push(`/themeExtras/${slug}/${key}/${i} "${v}" not found in items`);
           }
         });
       }

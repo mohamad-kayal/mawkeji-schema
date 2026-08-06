@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mawqeji.example/schema/site-data.schema.json",
-  "title": "Mawqeji site-data v1",
-  "description": "Canonical content payload for one Mawqeji site. Human contract: schema/SCHEMA.md — that file is the source of truth, this is its machine-checkable twin. NO SECRET MAY EVER BE ADDED HERE: the payload is published wholesale into world-readable HTML.",
+  "$id": "https://mawkeji.example/schema/site-data.schema.json",
+  "title": "Mawkeji site-data v1",
+  "description": "Canonical content payload for one Mawkeji site. Human contract: schema/SCHEMA.md — that file is the source of truth, this is its machine-checkable twin. NO SECRET MAY EVER BE ADDED HERE: the payload is published wholesale into world-readable HTML.",
   "type": "object",
   "additionalProperties": false,
   "required": ["meta", "seo", "features", "contact", "categories", "items"],
@@ -312,6 +312,10 @@
           "priceNote": { "type": "string" },
           "ctaLabel": { "type": "string" },
           "ctaMessage": { "type": "string" },
+          "itemsCategoryId": { "type": "string", "minLength": 1 },
+          "showPackages": { "type": "boolean", "default": false },
+          "addItemId": { "type": "string", "minLength": 1 },
+          "addItemLabel": { "type": "string" },
           "visible": { "type": "boolean", "default": true },
           "order": { "type": "integer" }
         }
