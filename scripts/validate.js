@@ -10,6 +10,13 @@ import { pathToFileURL } from 'node:url';
 // loaders and the constructor under others.
 const Ajv = Ajv2020.default ?? Ajv2020;
 
+// themeExtras stays additionalProperties: true by design (the namespaced
+// per-theme escape hatch, SCHEMA.md §11 item 7) — JSON Schema alone can't cap
+// its *total serialized size*, so that cap lives here instead. Measured with
+// compact JSON.stringify (no spacing), matching the already-parsed JS object
+// this function receives, not the on-disk pretty-printed file.
+const THEME_EXTRAS_MAX_CHARS = 20000;
+
 const schema = JSON.parse(readFileSync(new URL('../schema/site-data.schema.json', import.meta.url)));
 const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 const compiled = ajv.compile(schema);
@@ -109,9 +116,16 @@ function referentialErrors(data) {
   return errors;
 }
 
+function sizeErrors(data) {
+  if (!data?.themeExtras || typeof data.themeExtras !== 'object') return [];
+  const size = JSON.stringify(data.themeExtras).length;
+  if (size <= THEME_EXTRAS_MAX_CHARS) return [];
+  return [`/themeExtras is ${size} chars serialized, over the ${THEME_EXTRAS_MAX_CHARS}-char cap`];
+}
+
 export function validateSiteData(data) {
   compiled(data);
-  const errors = (compiled.errors ?? []).map(describe).concat(referentialErrors(data));
+  const errors = (compiled.errors ?? []).map(describe).concat(referentialErrors(data), sizeErrors(data));
   return { valid: errors.length === 0, errors };
 }
 

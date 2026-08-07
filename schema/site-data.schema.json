@@ -13,7 +13,7 @@
       "required": ["siteId", "businessName", "siteType", "themeId", "locale"],
       "properties": {
         "siteId": { "type": "string", "minLength": 1 },
-        "businessName": { "type": "string", "minLength": 1 },
+        "businessName": { "type": "string", "minLength": 1, "maxLength": 500 },
         "siteType": {
           "type": "string",
           "enum": ["restaurant", "sweets", "cafe", "clothing", "jewelry", "perfume", "wedding", "electronics", "furniture", "salon", "hall", "institute"]
@@ -40,8 +40,8 @@
       "additionalProperties": false,
       "required": ["title", "description"],
       "properties": {
-        "title": { "type": "string", "minLength": 1 },
-        "description": { "type": "string", "minLength": 1 }
+        "title": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 500 }
       }
     },
 
@@ -68,9 +68,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "name": { "type": "string" },
-        "tagline": { "type": "string" },
-        "since": { "type": "string" }
+        "name": { "type": "string", "maxLength": 500 },
+        "tagline": { "type": "string", "maxLength": 500 },
+        "since": { "type": "string", "maxLength": 500 }
       }
     },
 
@@ -79,14 +79,41 @@
       "additionalProperties": false,
       "required": ["whatsapp"],
       "properties": {
-        "phone": { "type": "string" },
+        "phone": { "type": "string", "maxLength": 500 },
         "whatsapp": {
           "type": "string",
           "pattern": "^[0-9]{8,15}$",
           "description": "Digits only, full international, no + and no spaces (wa.me format)."
         },
-        "address": { "type": "string" },
-        "area": { "type": "string" },
+        "address": { "type": "string", "maxLength": 500 },
+        "area": { "type": "string", "maxLength": 500 },
+        "city": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Promoted from themeExtras.<slug>.city (SCHEMA.md §11a item 7). Optional."
+        },
+        "addressHint": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Promoted from themeExtras.<slug>.addressHint (SCHEMA.md §11a item 7). Optional."
+        },
+        "hoursShort": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Promoted from themeExtras.<slug>.hoursShort (SCHEMA.md §11a item 7). Optional."
+        },
+        "homeHoursLines": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "type": "string", "maxLength": 300 },
+          "description": "Promoted from themeExtras.<slug>.homeHoursLines (array) or the older singular homeHoursLine (string, migrates to a one-element array) — SCHEMA.md §11a item 7. Optional."
+        },
+        "areasLead": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Promoted from themeExtras.<slug>.areasLead (SCHEMA.md §11a item 7). Optional."
+        },
         "mapUrl": {
           "type": "string",
           "pattern": "^(https://.+)?$",
@@ -118,9 +145,9 @@
         "additionalProperties": false,
         "required": ["day"],
         "properties": {
-          "day": { "type": "string", "minLength": 1 },
-          "open": { "type": "string" },
-          "close": { "type": "string" },
+          "day": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "open": { "type": "string", "maxLength": 500 },
+          "close": { "type": "string", "maxLength": 500 },
           "closed": { "type": "boolean", "default": false }
         }
       }
@@ -132,23 +159,24 @@
       "properties": {
         "deliveryEnabled": { "type": "boolean", "default": false },
         "pickupEnabled": { "type": "boolean", "default": false },
-        "areas": { "type": "array", "items": { "type": "string" } },
+        "areas": { "type": "array", "items": { "type": "string", "maxLength": 500 } },
         "fee": { "type": "integer", "minimum": 0 },
         "minOrder": { "type": "integer", "minimum": 0 },
-        "notes": { "type": "string" }
+        "notes": { "type": "string", "maxLength": 500 }
       }
     },
 
     "nav": {
       "type": "array",
+      "maxItems": 8,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "label"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "label": { "type": "string", "minLength": 1 },
-          "icon": { "type": "string" },
+          "label": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "icon": { "type": "string", "maxLength": 500 },
           "order": { "type": "integer" },
           "visible": { "type": "boolean", "default": true }
         }
@@ -159,21 +187,21 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "heroHeadline": { "type": "string" },
-        "heroSubline": { "type": "string" },
-        "ctaLabel": { "type": "string" },
+        "heroHeadline": { "type": "string", "maxLength": 500 },
+        "heroSubline": { "type": "string", "maxLength": 500 },
+        "ctaLabel": { "type": "string", "maxLength": 500 },
         "trustStrip": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "icon": { "type": "string" },
-              "label": { "type": "string" }
+              "icon": { "type": "string", "maxLength": 500 },
+              "label": { "type": "string", "maxLength": 500 }
             }
           }
         },
-        "storyTeaser": { "type": "string" },
+        "storyTeaser": { "type": "string", "maxLength": 500 },
         "foundedYear": { "type": ["string", "integer"] }
       }
     },
@@ -182,27 +210,27 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "story": { "type": "string" },
+        "story": { "type": "string", "maxLength": 1200 },
         "values": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "title": { "type": "string" },
-              "text": { "type": "string" }
+              "title": { "type": "string", "maxLength": 500 },
+              "text": { "type": "string", "maxLength": 500 }
             }
           }
         },
-        "ownerQuote": { "type": "string" },
+        "ownerQuote": { "type": "string", "maxLength": 500 },
         "timeline": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "year": { "type": "string" },
-              "text": { "type": "string" }
+              "year": { "type": "string", "maxLength": 500 },
+              "text": { "type": "string", "maxLength": 500 }
             }
           }
         }
@@ -211,34 +239,36 @@
 
     "categories": {
       "type": "array",
+      "maxItems": 50,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "name"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "name": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1, "maxLength": 120 },
           "order": { "type": "integer" },
           "visible": { "type": "boolean", "default": true },
-          "artId": { "type": "string" }
+          "artId": { "type": "string", "maxLength": 500 }
         }
       }
     },
 
     "items": {
       "type": "array",
+      "maxItems": 300,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "name", "categoryId"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "name": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1, "maxLength": 120 },
           "categoryId": { "type": "string", "minLength": 1 },
-          "description": { "type": "string" },
+          "description": { "type": "string", "maxLength": 1200 },
           "price": { "type": "integer", "minimum": 0 },
-          "unit": { "type": "string" },
-          "badge": { "type": "string" },
+          "unit": { "type": "string", "maxLength": 500 },
+          "badge": { "type": "string", "maxLength": 500 },
           "priceMode": {
             "type": "string",
             "enum": ["fixed", "byWeight", "onRequest", "from"],
@@ -252,16 +282,17 @@
               "additionalProperties": false,
               "required": ["label", "values"],
               "properties": {
-                "label": { "type": "string", "minLength": 1 },
-                "values": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+                "label": { "type": "string", "minLength": 1, "maxLength": 500 },
+                "values": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } }
               }
             }
           },
           "imageUrl": {
             "type": "string",
+            "maxLength": 500,
             "description": "Real photo. Plain string on purpose — relative paths are valid (interim manual publish). No format constraint."
           },
-          "artId": { "type": "string" },
+          "artId": { "type": "string", "maxLength": 500 },
           "visible": { "type": "boolean", "default": true },
           "order": { "type": "integer" }
         }
@@ -276,10 +307,10 @@
         "required": ["id", "name"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "name": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1, "maxLength": 120 },
           "price": { "type": "integer", "minimum": 0 },
-          "features": { "type": "array", "items": { "type": "string" } },
-          "badge": { "type": "string" },
+          "features": { "type": "array", "items": { "type": "string", "maxLength": 500 } },
+          "badge": { "type": "string", "maxLength": 500 },
           "visible": { "type": "boolean", "default": true },
           "order": { "type": "integer" }
         }
@@ -288,14 +319,15 @@
 
     "servicePages": {
       "type": "array",
+      "maxItems": 12,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "title"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "title": { "type": "string", "minLength": 1 },
-          "intro": { "type": "string" },
+          "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "intro": { "type": "string", "maxLength": 1200 },
           "layout": { "type": "string", "enum": ["steps", "list"], "default": "steps" },
           "steps": {
             "type": "array",
@@ -303,19 +335,19 @@
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "title": { "type": "string" },
-                "text": { "type": "string" }
+                "title": { "type": "string", "maxLength": 500 },
+                "text": { "type": "string", "maxLength": 500 }
               }
             }
           },
           "priceFrom": { "type": "integer", "minimum": 0 },
-          "priceNote": { "type": "string" },
-          "ctaLabel": { "type": "string" },
-          "ctaMessage": { "type": "string" },
+          "priceNote": { "type": "string", "maxLength": 500 },
+          "ctaLabel": { "type": "string", "maxLength": 500 },
+          "ctaMessage": { "type": "string", "maxLength": 500 },
           "itemsCategoryId": { "type": "string", "minLength": 1 },
           "showPackages": { "type": "boolean", "default": false },
           "addItemId": { "type": "string", "minLength": 1 },
-          "addItemLabel": { "type": "string" },
+          "addItemLabel": { "type": "string", "maxLength": 500 },
           "visible": { "type": "boolean", "default": true },
           "order": { "type": "integer" }
         }
@@ -324,6 +356,7 @@
 
     "gallery": {
       "type": "array",
+      "maxItems": 80,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -333,9 +366,10 @@
           "imageUrl": {
             "type": "string",
             "minLength": 1,
+            "maxLength": 500,
             "description": "Plain string on purpose — relative paths are valid. No format constraint."
           },
-          "caption": { "type": "string" },
+          "caption": { "type": "string", "maxLength": 500 },
           "order": { "type": "integer" },
           "visible": { "type": "boolean", "default": true }
         }
@@ -350,9 +384,9 @@
         "required": ["id", "name", "text"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "name": { "type": "string", "minLength": 1 },
-          "area": { "type": "string" },
-          "text": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "area": { "type": "string", "maxLength": 500 },
+          "text": { "type": "string", "minLength": 1, "maxLength": 500 },
           "visible": { "type": "boolean", "default": true }
         }
       }
@@ -366,8 +400,8 @@
         "required": ["id", "q", "a"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "q": { "type": "string", "minLength": 1 },
-          "a": { "type": "string", "minLength": 1 },
+          "q": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "a": { "type": "string", "minLength": 1, "maxLength": 500 },
           "order": { "type": "integer" },
           "visible": { "type": "boolean", "default": true }
         }
@@ -379,8 +413,8 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean", "default": false },
-        "text": { "type": "string" },
-        "style": { "type": "string" }
+        "text": { "type": "string", "maxLength": 500 },
+        "style": { "type": "string", "maxLength": 500 }
       }
     },
 
@@ -397,13 +431,13 @@
             "required": ["key", "label", "type"],
             "properties": {
               "key": { "type": "string", "minLength": 1 },
-              "label": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1, "maxLength": 500 },
               "type": {
                 "type": "string",
                 "enum": ["text", "textarea", "checkbox", "date", "select"]
               },
               "required": { "type": "boolean", "default": false },
-              "values": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+              "values": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } }
             },
             "if": {
               "properties": { "type": { "const": "select" } },
@@ -419,10 +453,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "orderTitle": { "type": "string" },
-        "paymentLine": { "type": "string" },
-        "inquiry": { "type": "string" },
-        "booking": { "type": "string" }
+        "orderTitle": { "type": "string", "maxLength": 500 },
+        "paymentLine": { "type": "string", "maxLength": 500 },
+        "inquiry": { "type": "string", "maxLength": 500 },
+        "booking": { "type": "string", "maxLength": 500 }
       }
     },
 
@@ -440,6 +474,24 @@
       "additionalProperties": false,
       "properties": {
         "presetId": { "type": "string" }
+      }
+    },
+
+    "copy": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Promoted universal brand microcopy (SCHEMA.md §11a item 7) — not contact data, so it gets its own top-level home alongside brand/theme rather than living under contact.",
+      "properties": {
+        "footerBlurb": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Promoted from themeExtras.<slug>.footerBlurb. Optional."
+        },
+        "storyTeaserTitle": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Promoted from themeExtras.<slug>.storyTeaserTitle. Optional."
+        }
       }
     },
 
