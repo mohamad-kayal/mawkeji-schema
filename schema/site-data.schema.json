@@ -16,7 +16,7 @@
         "businessName": { "type": "string", "minLength": 1, "maxLength": 500 },
         "siteType": {
           "type": "string",
-          "enum": ["restaurant", "sweets", "cafe", "clothing", "jewelry", "perfume", "wedding", "electronics", "furniture", "salon", "hall", "institute"]
+          "enum": ["restaurant", "sweets", "cafe", "clothing", "jewelry", "perfume", "wedding", "electronics", "furniture", "salon", "hall", "institute", "realestate"]
         },
         "themeId": {
           "type": "string",
@@ -60,6 +60,7 @@
         "giftNote": { "type": "boolean", "default": false },
         "sizeOptions": { "type": "boolean", "default": false },
         "weightPricing": { "type": "boolean", "default": false },
+        "itemSpecs": { "type": "boolean", "default": false },
         "liveOrders": { "type": "boolean", "default": false }
       }
     },
@@ -291,6 +292,20 @@
                 "values": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } }
               }
             }
+          },
+          "specs": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "value"],
+              "properties": {
+                "label": { "type": "string", "minLength": 1, "maxLength": 20 },
+                "value": { "type": "string", "minLength": 1, "maxLength": 30 }
+              }
+            },
+            "description": "Short label/value facts rendered as spec tiles (المساحة/١٤٥ م²). Strings, not numbers: '١٤٥ م²' and 'طابو أخضر' are not numeric. Gated by features.itemSpecs — SCHEMA.md §4."
           },
           "imageUrl": {
             "type": "string",
