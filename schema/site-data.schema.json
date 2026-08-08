@@ -70,7 +70,12 @@
       "properties": {
         "name": { "type": "string", "maxLength": 500 },
         "tagline": { "type": "string", "maxLength": 500 },
-        "since": { "type": "string", "maxLength": 500 }
+        "since": { "type": "string", "maxLength": 500 },
+        "logoUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "The shop's own logo (2026-08-08). Optional — every template falls back to the business-name wordmark it has always rendered, so a site without one is unchanged. Plain string on purpose: relative paths are valid after publish rewrites it, same as items[].imageUrl. Rendered in the header and footer, one uniform treatment across all themes."
+        }
       }
     },
 
@@ -291,6 +296,24 @@
             "type": "string",
             "maxLength": 500,
             "description": "Real photo. Plain string on purpose — relative paths are valid (interim manual publish). No format constraint."
+          },
+          "images": {
+            "type": "array",
+            "maxItems": 4,
+            "description": "Photos BEYOND `imageUrl` (2026-08-08). `imageUrl` remains the primary photo and the card thumbnail — its meaning is unchanged, so a payload written before this field renders exactly as before. A template shows `imageUrl` on the card and the sequence [imageUrl, ...images] in its photo viewer. Capped at 4 extras (5 total) — each photo is a real download on the weak-3G budget the templates are built to.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["imageUrl"],
+              "properties": {
+                "imageUrl": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500,
+                  "description": "Plain string on purpose — relative paths are valid. Same shape as gallery[].imageUrl."
+                }
+              }
+            }
           },
           "artId": { "type": "string", "maxLength": 500 },
           "visible": { "type": "boolean", "default": true },
