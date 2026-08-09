@@ -61,6 +61,7 @@
         "sizeOptions": { "type": "boolean", "default": false },
         "weightPricing": { "type": "boolean", "default": false },
         "itemSpecs": { "type": "boolean", "default": false },
+        "itemFilters": { "type": "boolean", "default": false },
         "liveOrders": { "type": "boolean", "default": false }
       }
     },
@@ -260,6 +261,36 @@
       }
     },
 
+    "itemFields": {
+      "type": "array",
+      "maxItems": 8,
+      "description": "Site-level custom item fields (D51). Agency-set: the owner picks values per item, never creates a field. `values` present = controlled vocabulary (panel renders a dropdown, chips are filterable); `values` absent = free text, display only. SCHEMA.md §4.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 60,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "description": "ASCII lowercase kebab. Referenced by items[].specs[].fieldId."
+          },
+          "label": { "type": "string", "minLength": 1, "maxLength": 20 },
+          "values": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": { "type": "string", "minLength": 1, "maxLength": 30 },
+            "description": "The controlled vocabulary. Absent means free text; an EMPTY array is a dead control and fails, same rule as ordering.extraFields select values."
+          },
+          "filterable": { "type": "boolean", "default": false },
+          "order": { "type": "integer" },
+          "visible": { "type": "boolean", "default": true }
+        }
+      }
+    },
+
     "items": {
       "type": "array",
       "maxItems": 300,
@@ -299,13 +330,29 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["label", "value"],
+              "required": ["value"],
+              "oneOf": [
+                { "required": ["fieldId"], "not": { "required": ["label"] } },
+                { "required": ["label"], "not": { "required": ["fieldId"] } }
+              ],
               "properties": {
-                "label": { "type": "string", "minLength": 1, "maxLength": 20 },
-                "value": { "type": "string", "minLength": 1, "maxLength": 30 }
+                "fieldId": { "type": "string", "minLength": 1, "maxLength": 60 },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20,
+                  "description": "DEPRECATED (D51) — migration window only. A row carrying `label` instead of `fieldId` renders as a display-only tile: no chip, no filter participation. Removed per-tenant once every live draft is re-saved or republished, never on a fixed date."
+                },
+                "value": { "type": "string", "minLength": 1, "maxLength": 30 },
+                "filterValue": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 30,
+                  "description": "The chip token. Must be one of its field's values[] — checked by validate.js's referential pass. Absent means this item does not participate in that field's filter."
+                }
               }
             },
-            "description": "Short label/value facts rendered as spec tiles (المساحة/١٤٥ م²). Strings, not numbers: '١٤٥ م²' and 'طابو أخضر' are not numeric. Gated by features.itemSpecs — SCHEMA.md §4."
+            "description": "Short label/value facts rendered as spec tiles (المساحة/١٤٥ م²). Strings, not numbers: '١٤٥ م²' and 'طابو أخضر' are not numeric. `value` is the display string; `filterValue` is the chip token. Gated by features.itemSpecs — SCHEMA.md §4."
           },
           "imageUrl": {
             "type": "string",

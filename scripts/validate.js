@@ -31,6 +31,13 @@ function describe(e) {
   if (e.keyword === 'enum') {
     return `${where} ${e.message}: ${e.params.allowedValues.join(', ')}`;
   }
+  // ajv's bare oneOf message ("must match exactly one schema in oneOf") names
+  // neither key in tension, and its companion lines ("must NOT be valid") are
+  // worse. Spec rows are the only place this contract uses oneOf, so the
+  // mapping is unambiguous.
+  if (e.keyword === 'oneOf' && /^\/items\/\d+\/specs\/\d+$/.test(where)) {
+    return `${where} must carry exactly one of "fieldId" (current) or "label" (deprecated, D51 migration window)`;
+  }
   return `${where} ${e.message}`;
 }
 
@@ -38,7 +45,7 @@ function describe(e) {
 // a typo'd categoryId or a duplicated id makes an item vanish from a live
 // catalogue without breaking anything visible. Ids are unique per array only —
 // a nav id and a category id may match, and often do.
-const ID_ARRAYS = ['items', 'categories', 'nav', 'packages', 'servicePages', 'gallery', 'testimonials', 'faq'];
+const ID_ARRAYS = ['items', 'categories', 'nav', 'packages', 'servicePages', 'gallery', 'testimonials', 'faq', 'itemFields'];
 
 function referentialErrors(data) {
   const errors = [];
@@ -57,6 +64,46 @@ function referentialErrors(data) {
     if (typeof item?.categoryId === 'string' && !categoryIds.has(item.categoryId)) {
       errors.push(`/items/${i}/categoryId "${item.categoryId}" not found in categories`);
     }
+  });
+  // itemFields refs (D51). Every one of these is silent in a browser — a bad
+  // filterValue just means an item never appears under its own chip, and a
+  // dangling fieldId means a tile quietly vanishes — which is exactly the §9
+  // test for "validation error, not lint". Duplicate itemFields[].id rides the
+  // shared ID_ARRAYS loop above.
+  const fieldsById = new Map();
+  arr('itemFields').forEach((f) => {
+    if (typeof f?.id === 'string') fieldsById.set(f.id, f);
+  });
+  arr('itemFields').forEach((f, i) => {
+    if (f?.filterable === true && !(Array.isArray(f.values) && f.values.length > 0)) {
+      errors.push(`/itemFields/${i} filterable field "${f?.id ?? ''}" has no values`);
+    }
+  });
+  arr('items').forEach((item, i) => {
+    const rows = Array.isArray(item?.specs) ? item.specs : [];
+    const seenFieldIds = new Set();
+    rows.forEach((s, j) => {
+      const at = `/items/${i}/specs/${j}`;
+      if (typeof s?.fieldId !== 'string') {
+        // A legacy label-only row (D51 migration window) cannot carry a
+        // filterValue: there is no field to resolve it against.
+        if (typeof s?.filterValue === 'string') errors.push(`${at}/filterValue requires fieldId`);
+        return;
+      }
+      if (seenFieldIds.has(s.fieldId)) {
+        errors.push(`${at}/fieldId duplicate "${s.fieldId}" on this item`);
+      }
+      seenFieldIds.add(s.fieldId);
+      const field = fieldsById.get(s.fieldId);
+      if (!field) {
+        errors.push(`${at}/fieldId "${s.fieldId}" not found in itemFields`);
+        return;
+      }
+      if (typeof s.filterValue === 'string'
+          && !(Array.isArray(field.values) && field.values.includes(s.filterValue))) {
+        errors.push(`${at}/filterValue "${s.filterValue}" not in itemFields "${s.fieldId}" values`);
+      }
+    });
   });
   // servicePages composition refs (2026-08-06 spec Part 3): a service page
   // names the category whose items it displays and/or one item its action
