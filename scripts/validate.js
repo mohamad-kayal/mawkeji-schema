@@ -65,6 +65,20 @@ function referentialErrors(data) {
       errors.push(`/items/${i}/categoryId "${item.categoryId}" not found in categories`);
     }
   });
+  // priceMode "byWeight" requires features.weightPricing (Task 11, 2026-08-12
+  // corruption fix). The panel's item editor (item-form.js's
+  // availablePriceModes()) offers the "byWeight" segment only when this flag
+  // is on, and silently reassigns any item whose saved priceMode isn't
+  // offered to "fixed" — dropping weightGrams — on the item's very next edit
+  // (page-item.js). A payload shipping a byWeight item with the flag off is
+  // therefore not just inconsistent, it is a corruption waiting for the
+  // owner's first edit, with no warning in the browser or the panel — same
+  // failure class as the categoryId/fieldId checks above.
+  arr('items').forEach((item, i) => {
+    if (item?.priceMode === 'byWeight' && !data?.features?.weightPricing) {
+      errors.push(`/items/${i} priceMode "byWeight" requires features.weightPricing`);
+    }
+  });
   // itemFields refs (D51). Every one of these is silent in a browser — a bad
   // filterValue just means an item never appears under its own chip, and a
   // dangling fieldId means a tile quietly vanishes — which is exactly the §9
