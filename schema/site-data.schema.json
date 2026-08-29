@@ -16,7 +16,7 @@
         "businessName": { "type": "string", "minLength": 1, "maxLength": 500 },
         "siteType": {
           "type": "string",
-          "enum": ["restaurant", "sweets", "cafe", "clothing", "jewelry", "perfume", "wedding", "electronics", "furniture", "salon", "hall", "institute", "realestate", "supermarket"]
+          "enum": ["restaurant", "sweets", "cafe", "clothing", "jewelry", "perfume", "wedding", "electronics", "furniture", "salon", "hall", "institute", "realestate", "supermarket", "hardware"]
         },
         "themeId": {
           "type": "string",
