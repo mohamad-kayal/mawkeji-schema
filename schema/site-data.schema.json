@@ -89,8 +89,8 @@
         "phone": { "type": "string", "maxLength": 500 },
         "whatsapp": {
           "type": "string",
-          "pattern": "^[0-9]{8,15}$",
-          "description": "Digits only, full international, no + and no spaces (wa.me format)."
+          "pattern": "^[1-9][0-9]{7,14}$",
+          "description": "Digits only, full international, no + and no spaces (wa.me format). No leading zero: a local trunk-0 number builds a dead wa.me link (D100)."
         },
         "address": { "type": "string", "maxLength": 500 },
         "area": { "type": "string", "maxLength": 500 },
